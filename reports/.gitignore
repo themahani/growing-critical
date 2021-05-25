@@ -1,0 +1,5 @@
+# ignore tex by-products
+*.aux
+*.log
+*.gz
+
