@@ -17,6 +17,7 @@ class NeuralNetwork:
         self.pos = np.random.random(size=(self.num, self.dim)) * self.size      # random initial position for the neuron in the canvas
         self.dist_mat = squareform(pdist(self.pos))     # distance matrix of the neurons
         self.radii = np.zeros(self.num, dtype=float) + 20    # list of neuron radii as disks (2D) or spheres (3D)
+        self.mutual_area = self.calc_mutual_area()      # calculate mutual area of disks(2D) or volume of spheres (3D)
 
     def timestep(self):
         """ evolve the system one time step """
@@ -28,17 +29,19 @@ class NeuralNetwork:
         find the mutual area(2D) or volume (3D) of the neurons to find
         the interaction coefficients.
         """
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BUG! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         mask = self.dist_mat < self.radii + self.radii.T    # find which neurons have intersections
         _mutual_area = np.zeros(shape=(self.num, self.num))
         r1 = np.tile(self.radii, (self.num, 1))      # matrix of radii
         r2 = r1.T           # transpose of radii as r2
-        _mutual_area[:, :] = 0.5 * \
-                np.sqrt((-self.dist_mat[mask] + r1[mask] + r2[mask]) *\
-                (self.dist_mat[mask] + r1[mask] - r2[mask]) *\
-                (self.dist_mat[mask] - r1[mask] + r2[mask]) *\
-                (self.dist_mat[mask] + r1[mask] + r2[mask]))
-        print(_mutual_area.shape)
+        for i in range(self.size):
+            for j in range(self.size):
+                if mask[i, j] == True:
+                    _mutual_area[i, j] = 0.5 * \
+                            np.sqrt((-self.dist_mat[i, j] + r1[i, j] + r2[i, j]) *\
+                            (self.dist_mat[i, j] + r1[i, j] - r2[i, j]) *\
+                            (self.dist_mat[i, j] - r1[i, j] + r2[i, j]) *\
+                            (self.dist_mat[i, j] + r1[i, j] + r2[i, j]))
+        return _mutual_area
 
 
     def display(self):
@@ -62,6 +65,7 @@ class NeuralNetwork:
 def test():
     """ function to test the system """
     network = NeuralNetwork(100, 100)
+    network.calc_mutual_area()
     network.display()
 
 
