@@ -10,13 +10,13 @@ from scipy.spatial.distance import squareform, pdist
 
 class NeuralNetwork:
     """ the neural network model """
-    def __init__(self, size=100, neuron_population=100):
+    def __init__(self, size=1, neuron_population=100):
         self.size = size    # the size of the area of the square canvas
         self.num = neuron_population    # the population of the neuron in canvas
         self.dim = 2        # dimension of the canvas
         self.pos = np.random.random(size=(self.num, self.dim)) * self.size      # random initial position for the neuron in the canvas
         self.dist_mat = squareform(pdist(self.pos))     # distance matrix of the neurons
-        self.radii = np.zeros(self.num, dtype=float) + 20    # list of neuron radii as disks (2D) or spheres (3D)
+        self.radii = np.random.random(size=self.num) * 0.05 * self.size    # list of neuron radii as disks (2D) or spheres (3D)
         self.mutual_area = self.calc_mutual_area()      # calculate mutual area of disks(2D) or volume of spheres (3D)
 
     def timestep(self):
@@ -59,12 +59,13 @@ class NeuralNetwork:
         y_line = y[na,:]+r[na,:]*np.cos(phi[:,na])
 
         plt.plot(x_line,y_line,'b-')
+        plt.title(f"neuron membrane of size {self.size} and population {self.num}")
         plt.show()
 
 
 def test():
     """ function to test the system """
-    network = NeuralNetwork(100, 100)
+    network = NeuralNetwork()
     network.calc_mutual_area()
     network.display()
 
