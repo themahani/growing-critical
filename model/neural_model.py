@@ -45,20 +45,28 @@ class NeuralNetwork:
         find the mutual area(2D) or volume (3D) of the neurons to find
         the interaction coefficients.
         """
-        mask = self.dist_mat < self.neurons['radius'] + self.neurons['radius'].T    # find which neurons have intersections
+        def func(d, r1, r2):
+            """ function for mutual area """
+            if d < r1 + r2:     # have intersection
+                if d < np.absolute(r1 - r2):    # one inside the other
+                    if r1 > r2:  # r1 is in r2
+                        return np.pi * r1 ** 2
+                    else:
+                        return np.pi * r2 ** 2
+                else:
+                    return 0.5 * np.sqrt((-d + r1 + r2) *\
+                            (-d - r1 + r2) * (-d + r1 - r2) * (d + r1 + r2))
+            else:
+                return 0
+
         _mutual_area = np.zeros(shape=(self.num, self.num)) # initialize
         r1 = np.tile(self.neurons['radius'], (self.num, 1))      # matrix of radii
         r2 = r1.T           # transpose of radii as r2
-        for i in range(self.size):
-            for j in range(self.size):
-                if mask[i, j] == True and i != j:   # if has intersection and not self
-                    _mutual_area[i, j] = 0.5 * \
-                            np.sqrt((-self.dist_mat[i, j] + r1[i, j] + r2[i, j]) *\
-                            (self.dist_mat[i, j] + r1[i, j] - r2[i, j]) *\
-                            (self.dist_mat[i, j] - r1[i, j] + r2[i, j]) *\
-                            (self.dist_mat[i, j] + r1[i, j] + r2[i, j]))
-        print("mutual area")
-        print(_mutual_area)
+
+        for i in range(self.num):
+            for j in range(self.num):
+                _mutual_area[i, j] = func(self.dist_mat[i, j],
+                                          r1[i, j], r2[i, j])
         return _mutual_area
 
 
@@ -85,7 +93,7 @@ class NeuralNetwork:
 
 def test():
     """ function to test the system """
-    network = NeuralNetwork()
+    network = NeuralNetwork(neuron_population=50)
     network.display()
 
 
