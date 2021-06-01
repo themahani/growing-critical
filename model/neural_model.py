@@ -37,13 +37,16 @@ class NeuralNetwork:
         self.mutual_area = self.calc_mutual_area()      # calculate mutual area of disks(2D) or volume of spheres (3D)
 
         self.neurons['f_i'] = f0    # initial firing rate
+        self.f_sat = 2
 
     def timestep(self):
         """ evolve the system one time step """
         _h = 10 ** -2       # defining timestep
         r_dot0 = 10 ** -2
 
-        self.neurons['radius'] += r_dot0 * _h
+        self.fired = np.random.random(size=self.num) < self.neurons['f_i'] * _h
+        self.neurons['radius'] += r_dot0 * _h   # homogenious increment
+        self.neurons['radius'][self.fired] -= r_dot0 / self.f_sat   # inhomogenious decrement
 
 
     def calc_mutual_area(self):
@@ -143,7 +146,8 @@ def test():
     network = NeuralNetwork(neuron_population=50)
     start = time()
     network.display('b')
-    for i in range(1000):
+    num = 100000
+    for i in range(num):
         print(f"\rstep {i}", end='')
         network.timestep()
     print(f"runtime = {time() - start}")
