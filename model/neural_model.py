@@ -36,16 +36,35 @@ class NeuralNetwork:
         self.dist_mat = squareform(pdist(pos.T))     # distance matrix of the neurons
         self.mutual_area = self.calc_mutual_area()      # calculate mutual area of disks(2D) or volume of spheres (3D)
 
+        self.f0 = f0        # f0
         self.neurons['f_i'] = f0    # initial firing rate
         self.f_sat = 2
 
+        self.fired = np.zeros(self.num, dtype=bool)     # see if neurons are fired
+        self.tau = 10 ** -2     # decay constant for firing rates
+        self._h = 10 ** -3      # time step
+        self.g = 500            # correlation coefficient of mutual area (Hz)
+
+
+    def update_fire_rate(self):
+        """ update the firing rate of each neuron """
+        # homogenious part
+        self.neurons['f_i'] += (self.f0 - self.neurons['f_i']) / self.tau * self._h
+        # inhomogenious part
+        if np.sum(self.fired) > 0:
+            self.mutual_area = self.calc_mutual_area()  # update mutual area
+            self.neurons['f_i'] += np.sum(self.mutual_area[self.fired]) * self.g
+        else:
+            pass
+
+
     def timestep(self):
         """ evolve the system one time step """
-        _h = 10 ** -2       # defining timestep
-        r_dot0 = 10 ** -2
-
-        self.fired = np.random.random(size=self.num) < self.neurons['f_i'] * _h
-        self.neurons['radius'] += r_dot0 * _h   # homogenious increment
+        r_dot0 = 10 ** -6
+        # decide which neurons fire at this timestep
+        self.fired = np.random.random(size=self.num) < self.neurons['f_i'] * self._h
+        self.update_fire_rate()     # update fire rate
+        self.neurons['radius'] += r_dot0 * self._h   # homogenious increment
         self.neurons['radius'][self.fired] -= r_dot0 / self.f_sat   # inhomogenious decrement
 
 
@@ -143,16 +162,25 @@ class NeuralNetwork:
 def test():
     """ function to test the system """
     from time import time
-    network = NeuralNetwork(neuron_population=50)
-    start = time()
+    network = NeuralNetwork(neuron_population=100)
     network.display('b')
-    num = 100000
+
+    start = time()
+    num = 500000
+    array = np.zeros(num)
+    rand = np.random.randint(network.num)
+
     for i in range(num):
         print(f"\rstep {i}", end='')
         network.timestep()
+        array[i] = np.sum(network.mutual_area[rand]) * network.tau * network.g
+
     print(f"runtime = {time() - start}")
+
     network.display('r')
 
+    plt.plot(np.linspace(1, num, num), array)
+    plt.show()
 
 
 if __name__ == '__main__':
