@@ -24,17 +24,19 @@ class Neuron
         bool fired;
 
     public:
-        Neuron(double radius, int system_size, double f0)
-            : _radius(radius), firing_rate(f0), fired(0)      // list initializers
+        Neuron(int system_size, double f0)
+            : firing_rate(f0), fired(0)      // list initializers
         {
             // initialize random seed
             std::srand(time(NULL));
             // define maximum of rand to specify the accuracy of the double number
-            int _RAND_MAX = 100000;
-            /* initialize random position */
+            int _RAND_MAX = 1000000;
+            /* initialize random position and radius*/
             x_pos = (std::rand() % _RAND_MAX) / double(_RAND_MAX) * system_size;
             y_pos = (std::rand() % _RAND_MAX) / double(_RAND_MAX) * system_size;
+            _radius = (std::rand() % _RAND_MAX) / double(_RAND_MAX) * 0.05 * system_size;
         }
+
         /*! return x position */
         const double get_x_pos() const
         {
