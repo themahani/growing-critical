@@ -6,6 +6,7 @@
  * of abstraction.
  */
 
+#include <cstdlib>
 #define LOG(x) std::cout << x << std::endl
 
 #include <stdlib.h>
@@ -19,10 +20,12 @@ class Neuron
         double _radius;
         double x_pos;
         double y_pos;
+        double firing_rate;
+        bool fired;
 
     public:
-        Neuron(double radius, int system_size)
-            : _radius(radius)
+        Neuron(double radius, int system_size, double f0)
+            : _radius(radius), firing_rate(f0), fired(0)      // list initializers
         {
             // initialize random seed
             std::srand(time(NULL));
@@ -50,8 +53,11 @@ class Neuron
             return _radius;
         }
 
-        void fire()
+        /* fire with a certain probability */
+        bool fire(double& _h)
         {
-
+            int prob = firing_rate * _h;    // the equation for probability of firing a neuron
+            fired =  (rand() % 1000) / 1000.0 < prob;   // fire with probability prob
+            return fired;
         }
 };
