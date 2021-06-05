@@ -1,0 +1,11 @@
+# redundant ccls cache
+.ccls-cache/
+
+# ignore the made binary
+GrowingCritical
+
+# ignore obj
+obj/
+
+# ignore source file *.d
+*.d
