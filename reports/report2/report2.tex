@@ -1,0 +1,41 @@
+\documentclass[a4paper, 12pt]{article}
+
+\title{Report 1}
+\author{Ali Abolhassanzadeh Mahani}
+
+\begin{document}
+	\section{Progress}
+	\begin{itemize}
+		\item We found a way to implement the whole process without the use of 
+		the \textit{event-based} method in \texttt{Python}.
+		
+		\item The python version is written by dividing the time step into a homogeneous 
+		and an in-homogeneous part. the homogeneous is obvious integration and 
+		the in-homogeneous section is almost like event-based. 
+		
+		\item I started implementing the system in \texttt{C++}. In this language I can
+		make the implementation \textit{event-based}. 
+		I created a class \texttt{Neuron} as a new level of abstraction for the system.
+		The system will then contain Neurons and using the functions that will be written
+		for \texttt{Neuron} and \texttt{Nervous System}, I will implement the system.
+	\end{itemize}
+
+	\section{Problems}
+	\begin{itemize}
+		\item The \texttt{python} version doesn't work. I assume there is something
+		wrong with the constants defined in the system; but still, anything is possible.
+		
+		\item The plots for $g\tau A_{i}$ don't come out as what we expect and for 
+		the first run that took about $160000$ seconds, the values flew into a small 
+		value of order $\mathcal{O}(10^{-2})$ and oscillated about those values for
+		the rest of the time.
+	\end{itemize}
+	\begin{itemize}
+		\item I'm thinking if I implement the system in the \textit{event-based} method,
+		I might be able to have a better view of what happens inside the system. So I start 
+		with \texttt{C++}
+	\end{itemize}
+
+	\section{Ideas}
+	
+\end{document}
