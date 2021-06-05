@@ -8,7 +8,7 @@
 
 int main(void)
 {
-    Neuron my_neuron = Neuron(0.5, 1);
+    Neuron my_neuron = Neuron(1, 0.05);
     std::cout << my_neuron.get_x_pos() << ", " << my_neuron.get_y_pos() << std::endl;
     std::cout << my_neuron.get_radius() << std::endl;
 
