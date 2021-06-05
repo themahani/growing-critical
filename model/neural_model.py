@@ -51,16 +51,16 @@ class NeuralNetwork:
         # homogenious part
         self.neurons['f_i'] += (self.f0 - self.neurons['f_i']) / self.tau * self._h
         # inhomogenious part
-        if np.sum(self.fired) > 0:
+        if np.sum(self.fired) > 0:  # if at least 1 neuron fired
             self.mutual_area = self.calc_mutual_area()  # update mutual area
-            self.neurons['f_i'] += np.sum(self.mutual_area[self.fired]) * self.g
+            self.neurons['f_i'] += np.sum(self.mutual_area[self.fired]) * self.g    # inhomogenious increment of f_i
         else:
             pass
 
 
     def timestep(self):
         """ evolve the system one time step """
-        r_dot0 = 10 ** -6
+        r_dot0 = 10 ** -2
         # decide which neurons fire at this timestep
         self.fired = np.random.random(size=self.num) < self.neurons['f_i'] * self._h
         self.update_fire_rate()     # update fire rate
@@ -100,6 +100,7 @@ class NeuralNetwork:
 
     def display(self, color):
         """ plot the neurons on the canvas as disks """
+        # preparations
         r = self.neurons['radius']
         x = self.neurons['x']
         y = self.neurons['y']
@@ -161,25 +162,28 @@ class NeuralNetwork:
 
 def test():
     """ function to test the system """
-    from time import time
+    from time import time   # to calc runtime of the program
     network = NeuralNetwork(neuron_population=100)
     network.display('b')
 
     start = time()
-    num = 500000
-    array = np.zeros(num)
-    rand = np.random.randint(network.num)
+    duration = 5 * 10 ** 2
+    num = int(duration // network._h)
+    interval = 100
+    array = np.zeros((num // interval, network.num))
 
-    for i in range(num):
-        print(f"\rstep {i}", end='')
-        network.timestep()
-        array[i] = np.sum(network.mutual_area[rand]) * network.tau * network.g
+    for i in range(num // interval):
+        print(f"\rstep {i} / {num // interval}", end='')
+        for _ in range(interval):
+            network.timestep()
+        array[i] = np.sum(network.mutual_area, axis=0) * network.tau * network.g
 
     print(f"runtime = {time() - start}")
 
     network.display('r')
 
-    plt.plot(np.linspace(1, num, num), array)
+    print(array[-1])
+    plt.plot(np.linspace(1, num // interval, num // interval), array)
     plt.show()
 
 
