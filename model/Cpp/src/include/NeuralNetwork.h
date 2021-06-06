@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 
 class NeuralNetwork
@@ -21,6 +22,24 @@ class NeuralNetwork
         double f0;      // base firing rate of the system
         std::vector<Neuron> neuron_arr;     // an array of all the neurons
         std::vector< std::vector< double > > dist_mat;  // distance matrix
+        std::vector< std::vector< double > > mutual_area;   // mutual area matrix
+
+        /*
+         * function to calculate the intersection area of
+         * two circles
+         */
+        double func(double d, double r1, double r2)
+        {
+            if (d > r1 + r2)    // if circles have no intersection
+                return 0;
+            else if (d < r1 - r2 && r1 < r2)    // if circle 1 inside circle 2
+                return M_PI * r1 * r1;
+            else if (d < r1 - r2 && r1 >= r2)   // if circle 2 inside circle 1
+                return M_PI * r2 * r2;
+            else    // if have intersection
+                return std::pow((-d + r1 + r2) * (-d - r1 + r2) *
+                        (-d + r1 - r2) * (d + r1 + r2), 0.5) * 0.5;
+        }
     public:
         NeuralNetwork(int sys_size, int pop, double f_zero)
             : population(pop), size(sys_size), f0(f_zero)
@@ -42,6 +61,15 @@ class NeuralNetwork
                                 std::pow(neuron_arr[i].get_y() - neuron_arr[j].get_y(), 2), 0.5));
                 }
                 dist_mat.push_back(row);
+            }
+
+            /* initialize the mutual area matrix */
+            for (int i = 0; i < population; ++i) {
+                std::vector<double> row;
+                for (int j = 0; j < population; ++j) {
+                    row.push_back(0.0);
+                }
+                mutual_area.push_back(row);
             }
         }
 
@@ -73,9 +101,9 @@ class NeuralNetwork
         /*
          * print the distance matrix of the neurons to stdout
          */
-        void print_dist_mat() const
+        void print_matrix(std::vector< std::vector< double > > matrix) const
         {
-            for (auto row : dist_mat) {
+            for (auto row : matrix) {
                 for (auto item : row) {
                     std::cout << item << ", ";
                 }
@@ -86,5 +114,25 @@ class NeuralNetwork
         const std::vector< std::vector< double > >* const get_dist_mat() const
         {
             return &dist_mat;
+        }
+
+        /*
+         * calculate the mutual area of the neurons
+         */
+         void calc_mutual_area()
+         {
+             for (int i = 0; i < population; ++i)
+             {
+                for (int j = 0; j < population; ++j)
+                {
+                    mutual_area[i][j] = func(dist_mat[i][j],
+                        neuron_arr[i].get_radius(), neuron_arr[j].get_radius());
+                }
+             }
+         }
+
+        const std::vector< std::vector< double > >* const get_mutual_area() const
+        {
+            return &mutual_area;
         }
 };
