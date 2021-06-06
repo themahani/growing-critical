@@ -38,8 +38,8 @@ class NeuralNetwork
                 std::vector<double> row;
                 for (int j = 0; j < population; ++j) {
                     row.push_back(
-                            std::pow(neuron_arr[i].get_x() - neuron_arr[j].get_x(), 2) +
-                            std::pow(neuron_arr[i].get_y() - neuron_arr[j].get_y(), 2));
+                            pow(std::pow(neuron_arr[i].get_x() - neuron_arr[j].get_x(), 2) +
+                                std::pow(neuron_arr[i].get_y() - neuron_arr[j].get_y(), 2), 0.5));
                 }
                 dist_mat.push_back(row);
             }
@@ -64,8 +64,8 @@ class NeuralNetwork
         {
             for (int i = 0; i < population; ++i) {
                 for (int j = 0; j < population; ++j) {
-                    dist_mat[i][j] = std::pow(neuron_arr[i].get_x() - neuron_arr[j].get_x(), 2) +
-                        std::pow(neuron_arr[i].get_y() - neuron_arr[j].get_y(), 2);
+                    dist_mat[i][j] = std::pow(std::pow(neuron_arr[i].get_x() - neuron_arr[j].get_x(), 2) +
+                        std::pow(neuron_arr[i].get_y() - neuron_arr[j].get_y(), 2), 0.5);
                 }
             }
         }
