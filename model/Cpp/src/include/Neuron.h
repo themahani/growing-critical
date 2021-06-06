@@ -6,9 +6,9 @@
  * of abstraction.
  */
 
-#include <cstdlib>
 #define LOG(x) std::cout << x << std::endl
 
+#include <cstdlib>
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>
@@ -28,7 +28,6 @@ class Neuron
             : firing_rate(f0), fired(0)      // list initializers
         {
             // initialize random seed
-            std::srand(time(NULL));
             // define maximum of rand to specify the accuracy of the double number
             int _RAND_MAX = 1000000;
             /* initialize random position and radius*/
@@ -38,13 +37,13 @@ class Neuron
         }
 
         /*! return x position */
-        const double get_x_pos() const
+        const double get_x() const
         {
             return x_pos;
         }
 
         /*! return y position */
-        const double get_y_pos() const
+        const double get_y() const
         {
             return y_pos;
         }
