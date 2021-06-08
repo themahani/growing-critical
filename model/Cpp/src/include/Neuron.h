@@ -17,15 +17,18 @@
 class Neuron
 {
     private:
-        double _radius;
         double x_pos;
         double y_pos;
-        double firing_rate;
+        double f0;
         bool fired;
 
     public:
+        double radius;
+        double firing_rate;
+
+
         Neuron(int system_size, double f0)
-            : firing_rate(f0), fired(0)      // list initializers
+            : firing_rate(f0), f0(f0), fired(0)      // list initializers
         {
             // initialize random seed
             // define maximum of rand to specify the accuracy of the double number
@@ -33,7 +36,7 @@ class Neuron
             /* initialize random position and radius*/
             x_pos = (std::rand() % _RAND_MAX) / double(_RAND_MAX) * system_size;
             y_pos = (std::rand() % _RAND_MAX) / double(_RAND_MAX) * system_size;
-            _radius = (std::rand() % _RAND_MAX) / double(_RAND_MAX) * 0.05 * system_size;
+            radius = (std::rand() % _RAND_MAX) / double(_RAND_MAX) * 0.05 * system_size;
         }
 
         /*! return x position */
@@ -51,14 +54,19 @@ class Neuron
         /*! return radius */
         const double get_radius() const
         {
-            return _radius;
+            return radius;
         }
 
         /* fire with a certain probability */
-        bool fire(double& _h)
+        bool fire(double& _h, double& K, double& f_sat)
         {
             int prob = firing_rate * _h;    // the equation for probability of firing a neuron
             fired =  (rand() % 1000) / 1000.0 < prob;   // fire with probability prob
+            radius += K * _h;   // homogeneous radius update
+            if (fired)
+            {
+                radius -= K / f_sat;    // in-homogeneous radius update
+            }
             return fired;
         }
 };

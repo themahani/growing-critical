@@ -8,9 +8,9 @@
 
 int main(void)
 {
-    NeuralNetwork my_system = NeuralNetwork(1, 10, 0.05);
+    NeuralNetwork my_system = NeuralNetwork(1, 50, 0.01, 0.001, 500, 0.01, 2.0, 0.001);
     my_system.calc_mutual_area();
-    my_system.print_matrix(*my_system.get_mutual_area());
+    my_system.evolve(10);
 
     return 0;
 }

@@ -23,6 +23,12 @@ class NeuralNetwork
         std::vector<Neuron> neuron_arr;     // an array of all the neurons
         std::vector< std::vector< double > > dist_mat;  // distance matrix
         std::vector< std::vector< double > > mutual_area;   // mutual area matrix
+        double _h;      // duration of each time step
+        int g;          // mutual area coefficient
+        double tau;     // spike decay characteristic time
+        double K;       // equation for R dot
+        double f_sat;   // how much the f_i goes down
+        std::vector< bool > fired;  // which neurons have fired
 
         /*
          * function to calculate the intersection area of
@@ -30,8 +36,8 @@ class NeuralNetwork
          */
         double func(double d, double r1, double r2)
         {
-            if (d > r1 + r2)    // if circles have no intersection
-                return 0;
+            if (d >= r1 + r2)    // if circles have no intersection
+                return 0.0;
             else if (d < r1 - r2 && r1 < r2)    // if circle 1 inside circle 2
                 return M_PI * r1 * r1;
             else if (d < r1 - r2 && r1 >= r2)   // if circle 2 inside circle 1
@@ -41,8 +47,10 @@ class NeuralNetwork
                         (-d + r1 - r2) * (d + r1 + r2), 0.5) * 0.5;
         }
     public:
-        NeuralNetwork(int sys_size, int pop, double f_zero)
-            : population(pop), size(sys_size), f0(f_zero)
+        NeuralNetwork(int sys_size, int pop, double f_zero, double time_step,
+                double g, double decay_time, double f_sat, double r_dot)
+            : population(pop), size(sys_size), f0(f_zero), _h(time_step),
+            g(g), tau(decay_time), f_sat(f_sat), K(r_dot)
         {
             /* initialize random seed */
             std::srand(time(NULL));
@@ -70,6 +78,11 @@ class NeuralNetwork
                     row.push_back(0.0);
                 }
                 mutual_area.push_back(row);
+            }
+
+            // inicilize fired
+            for (int i = 0; i < population; ++i) {
+                fired.push_back(0);
             }
         }
 
@@ -109,6 +122,7 @@ class NeuralNetwork
                 }
                 std::cout << std::endl;
             }
+            std::cout << std::endl;
         }
 
         const std::vector< std::vector< double > >* const get_dist_mat() const
@@ -134,5 +148,44 @@ class NeuralNetwork
         const std::vector< std::vector< double > >* const get_mutual_area() const
         {
             return &mutual_area;
+        }
+
+        /*
+         * evolve the system for 1 timestep
+         * and update the radius and firing rate
+         * of each neuron in the network
+         */
+        void timestep()
+        {
+            // fire neurons
+            for (int i = 0; i < population; ++i)
+            {
+                fired[i] = neuron_arr[i].fire(_h, K, f_sat);
+                neuron_arr[i].firing_rate += (f0 - neuron_arr[i].firing_rate) / tau * _h;   // homogeneous f_i update
+                // in-homogeneous f_i update
+                for (int j = 0; j < population && j != i; ++j)
+                {
+                    if (fired[j] == 1 && mutual_area[i][j] != 0)
+                        neuron_arr[i].firing_rate += tau * g * mutual_area[i][j];
+                }
+            }
+
+            calc_mutual_area();      // update mutual area
+
+        }
+
+        /*
+         * Function that evolves the system for a
+         * specified duration
+         */
+        void evolve(double duration)
+        {
+            int rep = int(duration / _h);   // find the number of time steps needed
+
+            print_matrix(mutual_area);
+            for (int i = 0; i < rep; ++i) {
+                timestep();
+            }
+            print_matrix(mutual_area);
         }
 };
