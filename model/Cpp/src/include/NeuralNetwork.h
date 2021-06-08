@@ -38,7 +38,7 @@ class NeuralNetwork
         {
             if (d >= r1 + r2)    // if circles have no intersection
                 return 0.0;
-            else if (d < r1 - r2 && r1 < r2)    // if circle 1 inside circle 2
+            else if (d < r2 - r1 && r1 < r2)    // if circle 1 inside circle 2
                 return M_PI * r1 * r1;
             else if (d < r1 - r2 && r1 >= r2)   // if circle 2 inside circle 1
                 return M_PI * r2 * r2;
