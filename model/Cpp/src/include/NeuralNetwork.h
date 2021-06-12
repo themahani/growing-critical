@@ -9,7 +9,10 @@
 #include "Neuron.h"
 #include <bits/stdc++.h>
 #include <cstdlib>
+#include <cstring>
+#include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
 #include <cmath>
 
@@ -187,5 +190,35 @@ class NeuralNetwork
                 timestep();
             }
             print_matrix(mutual_area);
+        }
+
+        /*
+         * output the position and radius to a file
+         *
+         * returns 0 is successful and 1 if failed
+         */
+        bool output_neuron_data(std::string run_name)
+        {
+            std::fstream output;    // create file stream
+
+            output.open(std::string("data/") + run_name + std::string("_neuron_data.csv"), std::ios::out);   // open file to write data
+
+            if (!output.is_open())  // report if failed and close
+            {
+                std::cerr << "[fstream]: Couldn't make file: " << strerror(errno) << std::endl;
+                return errno;
+            }
+            else
+            {
+                output << "x, y, radius," << std::endl; // titles
+
+                for (auto neuron : neuron_arr)  // for neuron in network
+                {
+                    output << neuron.get_x() << ", " << neuron.get_y() << ", "
+                        << neuron.get_radius() << ", " << std::endl;    // data of each neuron
+                }
+            }
+            output.close(); // close file and flush fstream
+            return 0;
         }
 };

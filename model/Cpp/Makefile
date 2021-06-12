@@ -13,6 +13,7 @@ EXT = .cpp
 SRCDIR = src
 OBJDIR = obj
 TMPDIR = $(OBJDIR)
+DATDIR = data
 
 ############## Do not change anything from here downwards! #############
 SRC = $(wildcard $(SRCDIR)/*$(EXT))
@@ -62,6 +63,10 @@ cleandep:
 .PHONY: cleantemp
 cleantemp:
 	$(RM) $(TMP)
+
+.PHONY: cleandat
+cleandat:
+	$(RM) $(DATDIR)/*
 
 #################### Cleaning rules for Windows OS #####################
 # Cleans complete project
