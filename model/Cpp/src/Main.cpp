@@ -4,15 +4,29 @@
 
 #include "include/NeuralNetwork.h"
 #include <iostream>
+#include <chrono>
 
 
 int main(void)
 {
-    NeuralNetwork my_system = NeuralNetwork(1, 50, 0.01, 0.001, 500, 0.01, 2.0, 0.001);
-    my_system.calc_mutual_area();
-    my_system.output_neuron_data("before");
-    my_system.evolve(100);
-    my_system.output_neuron_data("after");
+    auto start = std::chrono::high_resolution_clock::now();
+    /*
+     * args:
+     * network size: 1
+     * population: 50
+     * f0:  0.01
+     * time step: 0.001
+     * g: 500
+     * tau = dacay_time: 0.01
+     * f_sat: 2.0
+     * K = r_dot: 0.000001
+     */
+    NeuralNetwork my_system = NeuralNetwork(1, 100, 0.01, 0.001, 500, 0.01, 2.0, 0.000001);
+    my_system.simulate_mean_area(500000.0, "run2");
+
+    auto stop = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::seconds>(stop - start).count() << " seconds" << std::endl;
 
     return 0;
 }

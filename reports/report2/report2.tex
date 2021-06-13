@@ -18,6 +18,21 @@
 		I created a class \texttt{Neuron} as a new level of abstraction for the system.
 		The system will then contain Neurons and using the functions that will be written
 		for \texttt{Neuron} and \texttt{Nervous System}, I will implement the system.
+		
+		\item Completely implemented the dynamics of the neural network in C++.
+		The dynamics are event-based as they are a result of the interactions between the
+		network and the neurons.
+		
+		\item Added file stream and output of data to \texttt{.csv} files in C++.\\
+		Also added the \texttt{cleandat} .PHONY to the \texttt{Makefile} to clean all the data if used.
+		
+		\item Added the calculation and report of mean area intersection to \texttt{.csv} files.
+		Now I'm running the code for $10^5$ seconds. \\
+		Ok. The simulation seems to be working well but the duration was apparently a bit short and 
+		the plots showed that the system didn't reach stability.
+		
+		\item I optimized the \texttt{calc\_mutual\_area()} method and will now run the program for 
+		a duration of $5 \times 10^5 s$ and wait for the results.
 	\end{itemize}
 
 	\section{Problems}
