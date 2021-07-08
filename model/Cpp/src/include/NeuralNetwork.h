@@ -244,18 +244,29 @@ class NeuralNetwork
             return mean_area_vector;
         }
 
+        void log_radius(std::fstream& output)
+        {
+            for (auto neuron : neuron_arr)
+            {
+                output << neuron.get_radius() << ", ";
+            }
+            output << std::endl;
+        }
+
         /*
          * simulate the system for the given duration
          * and take samples of mean area intersection
          * of each neuron and store them in a file.
          */
-        void simulate_mean_area(double duration, std::string run_name)
+        void simulate_system(double duration, std::string run_name)
         {
             std::fstream output;    // create file stream
+            std::fstream radius_out;    // create file stream for radius
 
             output.open(std::string("data/") + run_name + std::string("_mean_area_intersection.csv"), std::ios::out);   // open file to write data
+            radius_out.open("data/" + run_name + "_radius.csv", std::ios::out);     // open file to write
 
-            if (!output.is_open())  // report if failed and close
+            if (!output.is_open() || !radius_out.is_open())  // report if failed and close
             {
                 std::cerr << "[fstream]: Couldn't make file: " << strerror(errno) << std::endl;
             }
@@ -267,11 +278,15 @@ class NeuralNetwork
                 {
                     for (int j = 0; j < rep; ++j) {    // run interval times
                         std::cout << "\r Progress: " << j / rep * 100 << "%" << std::flush;   // report progress
+
                         timestep(); // evolve for 1 time step
                         std::vector<double> means = calc_mean_area();   // sample mean_area_intersection
+
                         for (double mean : means)
                             output << mean << ", "; // write means to ouput file
                         output << std::endl;    // new line for new sampling
+
+                        log_radius(radius_out);
                     }
                     std::cout << std::endl;     // new line after end of progress report
                 }
@@ -279,17 +294,23 @@ class NeuralNetwork
                 {
                     for (int i = 0; i < 1000; ++i) {
                         std::cout << "\r Progress: " << i / 10.0 << "%" << std::flush;    // report probress
+
                         for (int j = 0; j < interval; ++j) {    // run interval times
                             timestep();
                         }
+
                         std::vector<double> means = calc_mean_area();   // sample mean_area_intersection
                         for (double mean : means)
                             output << mean << ", "; // write means to ouput file
                         output << std::endl;    // new line for new sampling
+
+                        log_radius(radius_out);
                     }
                     std::cout << std::endl;     // new line after end of progress report
                 }
             }
             output.close(); // close file and flush fstream
+            radius_out.close(); // close file and flush fstream
         }
+
 };
