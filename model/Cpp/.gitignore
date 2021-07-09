@@ -9,3 +9,6 @@ obj/
 
 # ignore source file *.d
 *.d
+
+# ignore ipython notebook files
+*.ipynb
