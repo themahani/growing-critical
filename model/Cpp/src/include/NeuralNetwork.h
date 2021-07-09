@@ -83,7 +83,7 @@ class NeuralNetwork
                 mutual_area.push_back(row);
             }
 
-            // inicilize fired
+            // initilize fired
             for (int i = 0; i < population; ++i) {
                 fired.push_back(0);
             }

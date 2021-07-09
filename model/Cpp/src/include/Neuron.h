@@ -65,6 +65,7 @@ class Neuron
             radius += K * _h;   // homogeneous radius update
             if (fired)
             {
+                std::cout << "[Neuron]: fired... " << fired << std::endl;
                 radius -= K / f_sat;    // in-homogeneous radius update
             }
             return fired;
