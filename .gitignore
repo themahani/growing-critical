@@ -133,3 +133,11 @@ refs/
 
 # ignore cpp redundant files
 .ccls-cache/
+
+# ignore latex residual files
+*.aux
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
