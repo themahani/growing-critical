@@ -67,25 +67,27 @@ class NeuralNetwork:
         self.neurons['radius'] += r_dot0 * self._h   # homogenious increment
         self.neurons['radius'][self.fired] -= r_dot0 / self.f_sat   # inhomogenious decrement
 
+    @staticmethod
+    def func(d, r1, r2):
+        """ function for mutual area """
+        if d < r1 + r2:     # have intersection
+            if d < np.absolute(r1 - r2):    # one inside the other
+                if r1 > r2:  # r1 is in r2
+                    return np.pi * r1 ** 2
+                else:
+                    return np.pi * r2 ** 2
+            else:
+                return 0.5 * np.sqrt((-d + r1 + r2) *\
+                        (-d - r1 + r2) * (-d + r1 - r2) * (d + r1 + r2))
+        else:
+            return 0
+
 
     def calc_mutual_area(self):
         """
         find the mutual area(2D) or volume (3D) of the neurons to find
         the interaction coefficients.
         """
-        def func(d, r1, r2):
-            """ function for mutual area """
-            if d < r1 + r2:     # have intersection
-                if d < np.absolute(r1 - r2):    # one inside the other
-                    if r1 > r2:  # r1 is in r2
-                        return np.pi * r1 ** 2
-                    else:
-                        return np.pi * r2 ** 2
-                else:
-                    return 0.5 * np.sqrt((-d + r1 + r2) *\
-                            (-d - r1 + r2) * (-d + r1 - r2) * (d + r1 + r2))
-            else:
-                return 0
 
         _mutual_area = np.zeros(shape=(self.num, self.num)) # initialize
         r1 = np.tile(self.neurons['radius'], (self.num, 1))      # matrix of radii
@@ -93,8 +95,8 @@ class NeuralNetwork:
 
         for i in range(self.num):
             for j in range(self.num):
-                _mutual_area[i, j] = func(self.dist_mat[i, j],
-                                          r1[i, j], r2[i, j])
+                _mutual_area[i, j] = NeuralNetwork.func(self.dist_mat[i, j],
+                        r1[i, j], r2[i, j])
         return _mutual_area
 
 
@@ -104,56 +106,52 @@ class NeuralNetwork:
         r = self.neurons['radius']
         x = self.neurons['x']
         y = self.neurons['y']
-        phi = np.linspace(0.0,2*np.pi,100)
+        fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
 
-        na=np.newaxis
+        neurons_circles = []
+        for i in range(self.num):
+            neurons_circles.append(plt.Circle(xy=(x[i], y[i]), radius=r[i],
+                alpha=0.2, color=color))
+            ax.add_patch(neurons_circles[i])
 
-        # the first axis of these arrays varies the angle,
-        # the second varies the circles
-        x_line = x[na,:]+r[na,:]*np.sin(phi[:,na])
-        y_line = y[na,:]+r[na,:]*np.cos(phi[:,na])
-
-        plt.plot(x_line,y_line,f'{color}-')
-        plt.title(f"neuron membrane of size {self.size} and population {self.num}")
-        plt.xlabel("x")
-        plt.ylabel("y")
+        ax.set_title(f"neuron membrane of size {self.size} and population {self.num}")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.set_xlim(0, self.size)
+        ax.set_ylim(0, self.size)
         plt.show()
 
-    def animate_system(self):
+    def animate_system(self, color):
         def animate(i):
             """ animate for FuncAnimation """
             for _ in range(10):
                 self.timestep()
 
             r = self.neurons['radius']
-            x_line = x[na,:]+r[na,:]*np.sin(phi[:,na])
-            y_line = y[na,:]+r[na,:]*np.cos(phi[:,na])
-            ax.clear()
-            ax.plot(x_line, y_line, 'b-')
-            plt.title(f"step {i}, neuron population = {self.num}")
+            for ind in range(self.num):
+                neurons_circles[ind].radius = r[ind]
+
+            ax.set_title(f"step {i}, neuron population = {self.num}")
 
             return 0
 
+        # preparations
         r = self.neurons['radius']
         x = self.neurons['x']
         y = self.neurons['y']
-        phi = np.linspace(0.0,2*np.pi,100)
+        fig, ax = plt.subplots(figsize=(8, 8), tight_layout=True)
 
-        na=np.newaxis
+        neurons_circles = []
+        for i in range(self.num):
+            neurons_circles.append(plt.Circle(xy=(x[i], y[i]), radius=r[i],
+                alpha=0.2, color=color))
+            ax.add_patch(neurons_circles[i])
 
-        # the first axis of these arrays varies the angle,
-        # the second varies the circles
-        x_line = x[na,:]+r[na,:]*np.sin(phi[:,na])
-        y_line = y[na,:]+r[na,:]*np.cos(phi[:,na])
-
-        fig, ax = plt.subplots()
+        # ax.set_title(f"neuron membrane of size {self.size} and population {self.num}")
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        ax.plot(x_line, y_line, 'b-')
-
         ax.set_xlim(0, self.size)
         ax.set_ylim(0, self.size)
-
         ani = FuncAnimation(fig, animate, interval=10, blit=False,
                 save_count=500)
         plt.show()
@@ -164,7 +162,7 @@ def test():
     """ function to test the system """
     from time import time   # to calc runtime of the program
     network = NeuralNetwork(neuron_population=100)
-    network.display('b')
+    network.animate_system('b')
 
     start = time()
     duration = 5 * 10 ** 2
