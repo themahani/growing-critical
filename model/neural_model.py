@@ -10,7 +10,9 @@ from scipy.spatial.distance import squareform, pdist
 
 class NeuralNetwork:
     """ the neural network model """
-    def __init__(self, size=1, neuron_population=100, f0=0.01):
+    def __init__(self, size=1, neuron_population: int=100, tau: float=0.01,
+            f0: float=0.01, f_sat: float=2, g: float=500, k: float=10 ** -6,
+            timestep: float=0.001) -> None:
         self.size = size    # the size of the area of the square canvas
         self.num = neuron_population    # the population of the neuron in canvas
         self.dim = 2        # dimension of the canvas
@@ -36,14 +38,15 @@ class NeuralNetwork:
         self.dist_mat = squareform(pdist(pos.T))     # distance matrix of the neurons
         self.mutual_area = self.calc_mutual_area()      # calculate mutual area of disks(2D) or volume of spheres (3D)
 
-        self.f0 = f0        # f0
+        self.f0 = f0        # f0 (Hz)
         self.neurons['f_i'] = f0    # initial firing rate
-        self.f_sat = 2
+        self.f_sat = f_sat      # f_sat (Hz)
 
         self.fired = np.zeros(self.num, dtype=bool)     # see if neurons are fired
-        self.tau = 10 ** -2     # decay constant for firing rates
-        self._h = 10 ** -3      # time step
-        self.g = 500            # correlation coefficient of mutual area (Hz)
+        self.tau = tau     # decay constant for firing rates
+        self._h = timestep      # time step
+        self.g = g            # correlation coefficient of mutual area (Hz)
+        self.k = k
 
 
     def update_fire_rate(self):
@@ -60,7 +63,7 @@ class NeuralNetwork:
 
     def timestep(self):
         """ evolve the system one time step """
-        r_dot0 = 10 ** -2
+        r_dot0 = self.k
         # decide which neurons fire at this timestep
         self.fired = np.random.random(size=self.num) < self.neurons['f_i'] * self._h
         self.update_fire_rate()     # update fire rate
