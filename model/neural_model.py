@@ -21,6 +21,7 @@ class NeuralNetwork:
         # y -> float
         # z -> float
         # radius -> float
+        # f_i -> float
         self.neurons = np.recarray((self.num,),
             dtype=[('x', float), ('y', float), ('z', float), ('radius', float),
                 ('f_i', float)])
@@ -47,6 +48,7 @@ class NeuralNetwork:
         self._h = timestep      # time step
         self.g = g            # correlation coefficient of mutual area (Hz)
         self.k = k
+        self.f_sat = f_sat
 
 
     def update_fire_rate(self):
@@ -63,15 +65,14 @@ class NeuralNetwork:
 
     def timestep(self):
         """ evolve the system one time step """
-        r_dot0 = self.k
         # decide which neurons fire at this timestep
         self.fired = np.random.random(size=self.num) < self.neurons['f_i'] * self._h
         self.update_fire_rate()     # update fire rate
-        self.neurons['radius'] += r_dot0 * self._h   # homogenious increment
-        self.neurons['radius'][self.fired] -= r_dot0 / self.f_sat   # inhomogenious decrement
+        self.neurons['radius'] += self.k * self._h   # homogenious increment
+        self.neurons['radius'][self.fired] -= self.k / self.f_sat   # inhomogenious decrement
 
     @staticmethod
-    def func(d, r1, r2):
+    def _func(d, r1, r2) -> float:
         """ function for mutual area """
         if d < r1 + r2:     # have intersection
             if d < np.absolute(r1 - r2):    # one inside the other
@@ -84,7 +85,6 @@ class NeuralNetwork:
                         (-d - r1 + r2) * (-d + r1 - r2) * (d + r1 + r2))
         else:
             return 0
-
 
     def calc_mutual_area(self):
         """
