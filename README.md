@@ -15,3 +15,7 @@ The structure of the project is as follows:
   - `cpp` is the C++ implementation of the code and follows the standard C++ project structure.
   - `python` contains the implementation of the model in Python.
 - `presentation` contains the source file of my lecture on this paper
+
+## Original Paper
+You can find reference to the original project below:\
+[**Growing Critical: Self-Organized Criticality in a Developing Neural System**](https://arxiv.org/abs/1811.02861v1)
