@@ -11,3 +11,7 @@ Research project source: Growing Critical Model of Neural Activity and Plasticit
 
 ## Project Structure
 The structure of the project is as follows:
+- `model` contains the source code of the model implemented in __Python__ and __C++__.
+  - `cpp` is the C++ implementation of the code and follows the standard C++ project structure.
+  - `python` contains the implementation of the model in Python.
+- `presentation` contains the source file of my lecture on this paper
