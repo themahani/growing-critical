@@ -72,7 +72,7 @@ class NeuralNetwork:
         self.neurons['radius'][self.fired] -= self.k / self.f_sat   # inhomogenious decrement
 
     @staticmethod
-    def _func(d, r1, r2) -> float:
+    def func(d, r1, r2) -> float:
         """ function for mutual area """
         if d < r1 + r2:     # have intersection
             if d < np.absolute(r1 - r2):    # one inside the other
@@ -120,8 +120,8 @@ class NeuralNetwork:
         ax.set_title(f"neuron membrane of size {self.size} and population {self.num}")
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        ax.set_xlim(0, self.size)
-        ax.set_ylim(0, self.size)
+        ax.set_xlim(-0.5, self.size + 0.5)
+        ax.set_ylim(-0.5, self.size + 0.5)
         plt.show()
 
     def animate_system(self, color):
@@ -153,8 +153,8 @@ class NeuralNetwork:
         # ax.set_title(f"neuron membrane of size {self.size} and population {self.num}")
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        ax.set_xlim(0, self.size)
-        ax.set_ylim(0, self.size)
+        ax.set_xlim(-0.5, self.size + 0.5)
+        ax.set_ylim(-0.5, self.size + 0.5)
         ani = FuncAnimation(fig, animate, interval=10, blit=False,
                 save_count=500)
         plt.show()
