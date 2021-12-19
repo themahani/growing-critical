@@ -77,9 +77,9 @@ class NeuralNetwork:
         if d < r1 + r2:     # have intersection
             if d < np.absolute(r1 - r2):    # one inside the other
                 if r1 < r2:  # r1 is in r2
-                    return np.pi * r2 ** 2
-                else:
                     return np.pi * r1 ** 2
+                else:
+                    return np.pi * r2 ** 2
             else:
                 part1 = r1 ** 2 * np.arccos((d*d + r1*r1 - r2*r2) / (2*d*r1))
                 part2 = r2 ** 2 * np.arccos((d*d - r1*r1 + r2*r2) / (2*d*r2))
