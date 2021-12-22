@@ -131,6 +131,9 @@ dmypy.json
 # ignore academic files
 refs/
 
+# ignore misc.
+misc/
+
 # ignore cpp redundant files
 .ccls-cache/
 
