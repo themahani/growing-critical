@@ -100,9 +100,12 @@ class NeuralNetwork:
         r2 = r1.T           # transpose of radii as r2
 
         for i in range(self.num):
-            for j in range(self.num):
+            for j in range(i):
                 _mutual_area[i, j] = NeuralNetwork.func(self.dist_mat[i, j],
                         r1[i, j], r2[i, j])
+                _mutual_area[j, i] = NeuralNetwork.func(self.dist_mat[i, j],
+                        r1[i, j], r2[i, j])
+            _mutual_area[i, i] = 0.0
         return _mutual_area
 
 
