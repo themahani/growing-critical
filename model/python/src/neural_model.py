@@ -58,7 +58,7 @@ class NeuralNetwork:
         # inhomogenious part
         if np.sum(self.fired) > 0:  # if at least 1 neuron fired
             self.mutual_area = self.calc_mutual_area()  # update mutual area
-            self.neurons['f_i'] += np.sum(self.mutual_area[self.fired]) * self.g    # inhomogenious increment of f_i
+            self.neurons['f_i'][self.fired] += np.sum(self.mutual_area[self.fired]) * self.g    # inhomogenious increment of f_i
         else:
             pass
 
