@@ -165,7 +165,7 @@ class NeuralNetwork:
                 save_count=500)
         plt.show()
 
-    def render(self, duration: float=10**5) -> None:
+    def render(self, duration: float=10**5, progress: bool=True) -> None:
         """Render the model for a duration
 
         duration:
@@ -173,17 +173,24 @@ class NeuralNetwork:
         """
         self.display('r')  # display the initial state of the system
         from time import time
-        print(f"Requested to render the model for {duration} seconds"
-                f"The value for model timestep: {self._h}"
-                f"\nBeginning the render process...\n")
+        print(f"Requested to render the model for {duration} seconds\n"
+                f"The value for model timestep: {self._h}\n"
+                f"Beginning the render process...\n")
 
         n_steps = int(duration // self._h)
-        start = time()
-        for i in range(n_steps):
-            self.timestep()
-        end = time()
+        if progress == True:
+            start = time()
+            for i in range(n_steps):
+                print("\rProgress: %.2f " % (i / n_steps * 100.0), end='')
+                self.timestep()
+            end = time()
+        else:
+            start = time()
+            for i in range(n_steps):
+                self.timestep()
+            end = time()
 
-        print(f"Rendered the model in {end-start}")
+        print(f"\n\nRendered the model in {end-start} seconds CPU time.")
 
         self.display('r')
 
