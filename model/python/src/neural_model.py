@@ -165,6 +165,28 @@ class NeuralNetwork:
                 save_count=500)
         plt.show()
 
+    def render(self, duration: float=10**5) -> None:
+        """Render the model for a duration
+
+        duration:
+            in seconds
+        """
+        self.display('r')  # display the initial state of the system
+        from time import time
+        print(f"Requested to render the model for {duration} seconds"
+                f"The value for model timestep: {self._h}"
+                f"\nBeginning the render process...\n")
+
+        n_steps = int(duration // self._h)
+        start = time()
+        for i in range(n_steps):
+            self.timestep()
+        end = time()
+
+        print(f"Rendered the model in {end-start}")
+
+        self.display('r')
+
 
 
 def test():
