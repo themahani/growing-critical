@@ -1,2 +1,4 @@
 # ignore the test run
 test-run.py
+# ignore python data files
+*.npy
