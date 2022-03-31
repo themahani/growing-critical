@@ -89,13 +89,13 @@ class NeuralNetwork:
         else:
             return 0
 
-    def calc_mutual_area(self):
+    def calc_mutual_area(self) -> np.ndarray:
         """
         find the mutual area(2D) or volume (3D) of the neurons to find
         the interaction coefficients.
         """
 
-        _mutual_area = np.zeros(shape=(self.num, self.num)) # initialize
+        _mutual_area = np.zeros(shape=(self.num, self.num),dtype=float) # initialize
         r1 = np.tile(self.neurons['radius'], (self.num, 1))      # matrix of radii
         r2 = r1.T           # transpose of radii as r2
 
@@ -178,19 +178,29 @@ class NeuralNetwork:
                 f"Beginning the render process...\n")
 
         n_steps = int(duration // self._h)
-        if progress == True:
+        interval = 1000 # take a sample every interval
+        leng = n_steps // interval  # the number of intervals to loop
+        arr = np.zeros(shape=(leng, self.num), dtype=float) # the sample
+        if progress == True:    # optional progress log
             start = time()
-            for i in range(n_steps):
-                print("\rProgress: %.2f " % (i / n_steps * 100.0), end='')
-                self.timestep()
+            for i in range(leng):
+                print("\rProgress: %.2f " % (i / leng * 100.0), end='')
+                for _ in range(interval):   # loop on interval
+                    self.timestep()
+                arr[i] = np.sum(self.calc_mutual_area(), axis=0) * self.tau \
+                        * self.g    # take sample
             end = time()
         else:
             start = time()
-            for i in range(n_steps):
-                self.timestep()
+            for i in range(leng):
+                for _ in range(interval):   # loop over interval
+                    self.timestep()
+                arr[i] = np.sum(self.calc_mutual_area(), axis=0) * self.tau \
+                        * self.g    # take sample
             end = time()
 
         print(f"\n\nRendered the model in {end-start} seconds CPU time.")
+        np.save("data.npy", arr)    # save the sample data
 
         self.display('r')
 
