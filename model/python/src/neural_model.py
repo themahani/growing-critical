@@ -9,19 +9,22 @@ from scipy.spatial.distance import squareform, pdist
 
 
 class NeuralNetwork:
-    """ the neural network model """
+    """Form the neural network model."""
     def __init__(self, size=1, neuron_population: int=100, tau: float=0.01,
             f0: float=0.01, f_sat: float=2, g: float=500, k: float=10 ** -6,
             timestep: float=0.001) -> None:
         self.size = size    # the size of the area of the square canvas
         self.num = neuron_population    # the population of the neuron in canvas
         self.dim = 2        # dimension of the canvas
-        # hash table to store data of neurons: x, y, z, radius, fired
-        # x -> float
-        # y -> float
-        # z -> float
-        # radius -> float
-        # f_i -> float
+
+        """
+        hash table to store data of neurons: x, y, z, radius, fired
+        x -> float
+        y -> float
+        z -> float
+        radius -> float
+        f_i -> float
+        """
         self.neurons = np.recarray((self.num,),
             dtype=[('x', float), ('y', float), ('z', float), ('radius', float),
                 ('f_i', float)])
@@ -52,7 +55,7 @@ class NeuralNetwork:
 
 
     def update_fire_rate(self):
-        """ update the firing rate of each neuron """
+        """Update the firing rate of each neuron."""
         # homogenious part
         self.neurons['f_i'] += (self.f0 - self.neurons['f_i']) / self.tau * self._h
         # inhomogenious part
@@ -64,7 +67,7 @@ class NeuralNetwork:
 
 
     def timestep(self):
-        """ evolve the system one time step """
+        """Evolve the system one time step."""
         # decide which neurons fire at this timestep
         self.fired = np.random.random(size=self.num) < self.neurons['f_i'] * self._h
         self.update_fire_rate()     # update fire rate
@@ -73,7 +76,17 @@ class NeuralNetwork:
 
     @staticmethod
     def func(d, r1, r2) -> float:
-        """ function for mutual area """
+        """Calculate the intersection area of two circles and return it.
+
+        Parameters
+        ----------
+        d
+            Distance of the centers of two circles
+        r1
+            Radius of the 1st circle
+        r2
+            Radius of the second circle
+        """
         if d < r1 + r2:     # have intersection
             if d < np.absolute(r1 - r2):    # one inside the other
                 if r1 < r2:  # r1 is in r2
@@ -90,10 +103,7 @@ class NeuralNetwork:
             return 0
 
     def calc_mutual_area(self) -> np.ndarray:
-        """
-        find the mutual area(2D) or volume (3D) of the neurons to find
-        the interaction coefficients.
-        """
+        """Calculate the mutual area(2D) or volume (3D) of all neurons."""
 
         _mutual_area = np.zeros(shape=(self.num, self.num),dtype=float) # initialize
         r1 = np.tile(self.neurons['radius'], (self.num, 1))      # matrix of radii
@@ -110,7 +120,7 @@ class NeuralNetwork:
 
 
     def display(self, color):
-        """ plot the neurons on the canvas as disks """
+        """Plot the neurons on the canvas as disks."""
         # preparations
         r = self.neurons['radius']
         x = self.neurons['x']
@@ -132,7 +142,7 @@ class NeuralNetwork:
 
     def animate_system(self, color):
         def animate(i):
-            """ animate for FuncAnimation """
+            """Animate for FuncAnimation."""
             for _ in range(10):
                 self.timestep()
 
@@ -166,10 +176,14 @@ class NeuralNetwork:
         plt.show()
 
     def render(self, duration: float=10**5, progress: bool=True) -> None:
-        """Render the model for a duration
+        """Render the model for a set duration.
 
-        duration:
+        Parameters
+        ----------
+        duration
             in seconds
+        progress
+            Assign True is you want to see the progress bar.
         """
         self.display('r')  # display the initial state of the system
         from time import time
@@ -181,7 +195,7 @@ class NeuralNetwork:
         interval = 1000 # take a sample every interval
         leng = n_steps // interval  # the number of intervals to loop
         arr = np.zeros(shape=(leng, self.num), dtype=float) # the sample
-        if progress == True:    # optional progress log
+        if progress:    # optional progress log
             start = time()
             for i in range(leng):
                 print("\rProgress: %.2f " % (i / leng * 100.0), end='')
@@ -207,7 +221,7 @@ class NeuralNetwork:
 
 
 def test():
-    """ function to test the system """
+    """Test the system."""
     from time import time   # to calc runtime of the program
     network = NeuralNetwork(neuron_population=100)
     network.animate_system('b')
