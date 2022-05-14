@@ -78,6 +78,7 @@ class NeuralNetwork:
     def func(d, r1, r2) -> float:
         """Calculate the intersection area of two circles and return it.
 
+        ...
         Parameters
         ----------
         d
@@ -178,6 +179,7 @@ class NeuralNetwork:
     def render(self, duration: float=10**5, progress: bool=True) -> None:
         """Render the model for a set duration.
 
+        ...
         Parameters
         ----------
         duration
