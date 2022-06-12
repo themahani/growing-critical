@@ -106,6 +106,30 @@ class NeuralNetwork:
         else:
             return ind
 
+
+    def _find_next_spike(self):
+        """Find the next spike time and the neuron that fires
+
+        Returns
+        -------
+        ind: int
+            index of the neuron that fires the next spike
+        """
+        max_time = self.time_ax.shape() # initialize as the latest time possible
+        rand = np.random.uniform(0, 1, self.num)    # generate random for time
+        for i in range(self.num):   # do this for each neuron
+            f_ind = NeuralNetwork.nearest_value(self.f_list,
+                self.neurons['f_i'][i]) # find the best f0 for f_i of this neuron
+            rand_time_index = NeuralNetwork.nearest_value(self.cpdf[f_ind],
+                rand[i])    # find the next spike of neuron i
+            if rand_time_index == None: # if rand_time greater than time axis, ignore it
+                continue
+            if rand_time_index < max_time:
+                max_time = rand_time_index  # keep the min time
+
+        return max_time * self._h
+
+
     def update_fire_rate(self):
         """Update the firing rate of each neuron."""
         # homogenious part
