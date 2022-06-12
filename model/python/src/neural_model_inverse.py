@@ -12,7 +12,7 @@ class NeuralNetwork:
     """Form the neural network model."""
     def __init__(self, size=1, neuron_population: int=100, tau: float=0.01,
             f0: float=0.01, f_sat: float=2, g: float=500, k: float=10 ** -6,
-            timestep: float=0.001) -> None:
+            timestep: float=0.001, random_seed: int=20) -> None:
         self.size = size    # the size of the area of the square canvas
         self._num = neuron_population    # the population of the neuron in canvas
         self.dim = 2        # dimension of the canvas
@@ -43,7 +43,7 @@ class NeuralNetwork:
         self.mutual_area = self.calc_mutual_area()      # calculate mutual area of disks(2D) or volume of spheres (3D)
 
         self.f0 = f0        # f0 (Hz)
-        self.neurons['f_i'] = f0    # initial firing rate
+        self.neurons['f_i'] = np.random.uniform(0, 1, self._num)    # initial firing rate
         self.f_sat = f_sat      # f_sat (Hz)
 
         self.fired = np.zeros(self._num, dtype=bool)     # see if neurons are fired
@@ -64,6 +64,8 @@ class NeuralNetwork:
         self.cpdf = np.array(cpdf_list)
 
         self.current_time = 0   # initialize system time
+        # create pseudo-random number generator (helps with recreating results)
+        self.rng = np.random.default_rng(seed=random_seed)
 
 
     @staticmethod
@@ -134,17 +136,6 @@ class NeuralNetwork:
 
         return min_time * self._h, neuron_ind
 
-    # def update_fire_rate(self):
-    #     """Update the firing rate of each neuron."""
-    #     # homogenious part
-    #     self.neurons['f_i'] += (self.f0 - self.neurons['f_i']) / self.tau * self._h
-    #     # inhomogenious part
-    #     if np.sum(self.fired) > 0:  # if at least 1 neuron fired
-    #         self.mutual_area = self.calc_mutual_area()  # update mutual area
-    #         self.neurons['f_i'][self.fired] += np.sum(self.mutual_area[self.fired]) * self.g    # inhomogenious increment of f_i
-    #     else:
-    #         pass
-
     def _update_fire_rate(self, duration: float, fired_neuron: int):
         """Update the firing rate of the neurons until the given duration"""
         self.mutual_area = self.calc_mutual_area()  # update mutual area
@@ -169,6 +160,7 @@ class NeuralNetwork:
         time_limit = self.current_time + until
         while self.current_time < time_limit:
             next_spike_time, fired_neuron = self._find_next_spike()
+            print(f"neuron {fired_neuron} fired")
             self._update_fire_rate(next_spike_time, fired_neuron)   # update the firing rate
             self._update_radius(next_spike_time, fired_neuron)  # update radius
             self.current_time += next_spike_time    # update system time
@@ -249,7 +241,7 @@ class NeuralNetwork:
             for ind in range(self._num):
                 neurons_circles[ind].radius = r[ind]
 
-            ax.set_title(f"Current System Time = {self.current_time}, Neuron Population = {self._num}")
+            ax.set_title(f"Current System Time = {self.current_time:.2f}, Neuron Population = {self._num}")
 
             return 0
 
@@ -323,7 +315,7 @@ class NeuralNetwork:
 def test():
     """Test the system."""
     from time import time   # to calc runtime of the program
-    network = NeuralNetwork(neuron_population=100)
+    network = NeuralNetwork(neuron_population=10)
     network.animate_system('b')
 
 
