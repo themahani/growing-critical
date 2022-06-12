@@ -54,6 +54,58 @@ class NeuralNetwork:
         self.f_sat = f_sat
 
 
+        self.time_ax = np.arange(0, 500 ,timestep)  # initialize the time axis
+        self.f_list = np.arange(0.01, 10, .1)   # list of various initial f
+        cpdf_list = []  # initialize cpdf
+        for f0 in self.f_list:
+            isi = NeuralNetwork.pdf(self.time_ax, tau=tau, f_0=self.f0, f0=f0)
+            cpdf_list.append(np.cumsum(isi) * self._h)
+        self.cpdf = np.array(cpdf_list)
+
+
+    @staticmethod
+    def pdf(t: np.ndarray, tau:float = 0.01, f_0:float = 0.01, f0:float = 1.) -> np.ndarray:
+        """Return the Probability Distribution Fucntion of spike time intervals
+
+        ...
+        Parameters
+        ----------
+        t
+            time in seconds
+        tau : float, default=0.01
+            time constant in seconds
+        f_0 : float, default=0.01
+            base fire rate of neurons
+        f0
+            fire rate of neurons at the current time
+
+        """
+        return (f_0 + (f0 - f_0) * np.exp(-t / tau)) \
+            * np.exp(-f_0 * t - tau * (f0 - f_0) * (1 - np.exp(-t / tau)))
+
+    @staticmethod
+    def nearest_value(arr: np.ndarray, value: float):
+        """find the index of the nearest value in array to `value`
+        Args:
+            arr: np.ndarray
+                array to find the index in (assuming it is sorted)
+            value: float
+                value to check the nearest values for in `arr`
+
+        Returns:
+            ind:
+                array of indices for the nearest values in `arr`
+        """
+        ind = np.searchsorted(arr, value, side='left')
+        if ind == len(arr):
+            return
+
+        mask = np.where(np.abs(arr[ind] - value) > np.abs(arr[ind-1] - value))[0]
+        if mask:
+            return ind-1
+        else:
+            return ind
+
     def update_fire_rate(self):
         """Update the firing rate of each neuron."""
         # homogenious part
