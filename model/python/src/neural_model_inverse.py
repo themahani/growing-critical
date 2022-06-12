@@ -121,7 +121,8 @@ class NeuralNetwork:
             index of the neuron that fires the next spike
         """
         min_time = self.MAX_TIME    # initialize as the latest time possible
-        rand = np.random.uniform(0, 1, self._num)    # generate random for time
+        rand = self.rng.uniform(0, 1, self._num)    # generate random for time
+        print(rand)
         neuron_ind = 0
         for i in range(self._num):   # do the following for each neuron
             f_ind = NeuralNetwork.nearest_value(self.f_list,
@@ -315,8 +316,14 @@ class NeuralNetwork:
 def test():
     """Test the system."""
     from time import time   # to calc runtime of the program
-    network = NeuralNetwork(neuron_population=10)
-    network.animate_system('b')
+    network = NeuralNetwork(neuron_population=10, k=1e-5)
+    for i in range(0, len(network.f_list), 10):
+        plt.plot(network.time_ax, network.cpdf[i], label=f"{network.f_list[i]}")
+    plt.legend(loc=0)
+    plt.show()
+
+
+    # network.animate_system('b')
 
 
 if __name__ == '__main__':
