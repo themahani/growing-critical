@@ -105,7 +105,7 @@ class NeuralNetwork:
         if ind == len(arr):
             return
 
-        mask = np.where(np.abs(arr[ind] - value) > np.abs(arr[ind-1] - value))[0]
+        mask = np.abs(arr[ind] - value) > np.abs(arr[ind-1] - value)
         if mask:
             return ind-1
         else:
@@ -120,22 +120,21 @@ class NeuralNetwork:
         ind: int
             index of the neuron that fires the next spike
         """
-        min_time = self.MAX_TIME    # initialize as the latest time possible
+        min_time_ind = self.MAX_TIME // self._h    # initialize as the latest time possible
         rand = self.rng.uniform(0, 1, self._num)    # generate random for time
-        print(rand)
         neuron_ind = 0
         for i in range(self._num):   # do the following for each neuron
             f_ind = NeuralNetwork.nearest_value(self.f_list,
                 self.neurons['f_i'][i]) # find the best f0 for f_i of this neuron
             rand_time_index = NeuralNetwork.nearest_value(self.cpdf[f_ind],
                 rand[i])    # find the next spike of neuron i
-            if rand_time_index == None: # if rand_time greater than time axis, ignore it
+            if rand_time_index is None: # if rand_time greater than time axis, ignore it
                 continue
-            if rand_time_index < min_time:
+            if rand_time_index < min_time_ind:
                 min_time = rand_time_index  # keep the min time
                 neuron_ind = i      # record the neuron that fired
 
-        return min_time * self._h, neuron_ind
+        return min_time_ind * self._h, neuron_ind
 
     def _update_fire_rate(self, duration: float, fired_neuron: int):
         """Update the firing rate of the neurons until the given duration"""
@@ -316,11 +315,14 @@ class NeuralNetwork:
 def test():
     """Test the system."""
     from time import time   # to calc runtime of the program
-    network = NeuralNetwork(neuron_population=10, k=1e-5)
-    for i in range(0, len(network.f_list), 10):
-        plt.plot(network.time_ax, network.cpdf[i], label=f"{network.f_list[i]}")
-    plt.legend(loc=0)
-    plt.show()
+    seed = eval(input("Enter seed:\n>> "))
+    network = NeuralNetwork(neuron_population=10, k=1e-5, random_seed=seed)
+    # for i in range(0, len(network.f_list), 10):
+    #     plt.plot(network.time_ax, network.cpdf[i], label=f"{network.f_list[i]}")
+    # plt.legend(loc=0)
+    # plt.show()
+
+    network.evolve(300)
 
 
     # network.animate_system('b')
