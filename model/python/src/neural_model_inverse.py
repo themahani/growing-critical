@@ -160,7 +160,6 @@ class NeuralNetwork:
         time_limit = self.current_time + until
         while self.current_time < time_limit:
             next_spike_time, fired_neuron = self._find_next_spike()
-            print(f"neuron {fired_neuron} fired")
             self._update_fire_rate(next_spike_time, fired_neuron)   # update the firing rate
             self._update_radius(next_spike_time, fired_neuron)  # update radius
             self.current_time += next_spike_time    # update system time
@@ -266,7 +265,8 @@ class NeuralNetwork:
                 save_count=500)
         plt.show()
 
-    def render(self, duration: float=10**5, progress: bool=True) -> None:
+    def render(self, duration: float=10**5, interval:int = 1000,
+            progress: bool=True) -> None:
         """Render the model for a set duration.
 
         ...
@@ -276,6 +276,8 @@ class NeuralNetwork:
             in seconds
         progress
             Assign True is you want to see the progress bar.
+        interval
+            The system time interval between data aquisition (in seconds)
         """
         self.display('r')  # display the initial state of the system
         from time import time
@@ -283,30 +285,22 @@ class NeuralNetwork:
                 f"The value for model timestep: {self._h}\n"
                 f"Beginning the render process...\n")
 
-        n_steps = int(duration // self._h)
-        interval = 1000 # take a sample every interval
-        leng = n_steps // interval  # the number of intervals to loop
-        arr = np.zeros(shape=(leng, self._num), dtype=float) # the sample
+        arr = []
         if progress:    # optional progress log
             start = time()
-            for i in range(leng):
-                print("\rProgress: %.2f " % (i / leng * 100.0), end='')
-                for _ in range(interval):   # loop on interval
-                    self.timestep()
-                arr[i] = np.sum(self.calc_mutual_area(), axis=0) * self.tau \
-                        * self.g    # take sample
+            while self.current_time < duration:
+                print(f"\rProgress: {self.current_time:.2f} / {duration} seconds ", end='')
+                self.evolve(interval)   # evolve for interval seconds
+                arr.append(np.sum(self.mutual_area, axis=0) * self.tau * self.g)    # record mean mutual
             end = time()
         else:
             start = time()
-            for i in range(leng):
-                for _ in range(interval):   # loop over interval
-                    self.timestep()
-                arr[i] = np.sum(self.calc_mutual_area(), axis=0) * self.tau \
-                        * self.g    # take sample
+            while self.current_time < duration:
+                self.evolve(interval)   # evolve for interval seconds
             end = time()
 
         print(f"\n\nRendered the model in {end-start} seconds CPU time.")
-        np.save("data.npy", arr)    # save the sample data
+        np.save("data.npy", np.array(arr))    # save the sample data
 
         self.display('r')
 
@@ -316,13 +310,9 @@ def test():
     """Test the system."""
     from time import time   # to calc runtime of the program
     seed = eval(input("Enter seed:\n>> "))
-    network = NeuralNetwork(neuron_population=10, k=1e-5, random_seed=seed)
-    # for i in range(0, len(network.f_list), 10):
-    #     plt.plot(network.time_ax, network.cpdf[i], label=f"{network.f_list[i]}")
-    # plt.legend(loc=0)
-    # plt.show()
-
-    network.evolve(3000)
+    network = NeuralNetwork(neuron_population=100, k=1e-5, random_seed=seed)
+    # network.evolve(3000)
+    network.render(1e4, progress=True)
 
 
     # network.animate_system('b')
