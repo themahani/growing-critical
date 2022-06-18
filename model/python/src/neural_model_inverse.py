@@ -131,7 +131,7 @@ class NeuralNetwork:
             if rand_time_index is None: # if rand_time greater than time axis, ignore it
                 continue
             if rand_time_index < min_time_ind:
-                min_time = rand_time_index  # keep the min time
+                min_time_ind = rand_time_index  # keep the min time
                 neuron_ind = i      # record the neuron that fired
 
         return min_time_ind * self._h, neuron_ind
@@ -322,7 +322,7 @@ def test():
     # plt.legend(loc=0)
     # plt.show()
 
-    network.evolve(300)
+    network.evolve(3000)
 
 
     # network.animate_system('b')
