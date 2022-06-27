@@ -12,7 +12,7 @@ class NeuralNetwork:
     """Form the neural network model."""
     def __init__(self, size=1, neuron_population: int=100, tau: float=0.01,
             f0: float=0.01, f_sat: float=2, g: float=500, k: float=1e-6,
-            timestep: float=0.001, random_seed: int=20) -> None:
+            timestep: float=0.001, random_seed: int=20, prefix:str = "") -> None:
         self.size = size    # the size of the area of the square canvas
         self._num = neuron_population    # the population of the neuron in canvas
         self.dim = 2        # dimension of the canvas
@@ -66,6 +66,8 @@ class NeuralNetwork:
         self.current_time = 0   # initialize system time
         # create pseudo-random number generator (helps with recreating results)
         self.rng = np.random.default_rng(seed=random_seed)
+        # set the prefix for saving files for each run of the system
+        self.prefix = prefix
 
 
     @staticmethod
@@ -141,17 +143,17 @@ class NeuralNetwork:
     def _update_fire_rate(self, duration: float, fired_neuron: int):
         """Update the firing rate of the neurons until the given duration"""
         self.mutual_area = self.calc_mutual_area()  # update mutual area
-
-        # inhomogenious update
-        self.neurons['f_i'] += self.mutual_area[fired_neuron] * self.g * self._h
         # homogenious update
         self.neurons['f_i'] = self.f0 - (self.f0 - self.neurons['f_i']) \
             * np.exp(-duration / self.tau)
 
+        # inhomogenious update
+        self.neurons['f_i'] += self.mutual_area[fired_neuron] * self.g
+
     def _update_radius(self, duration: float, fired_neuron: int) -> None:
         """Update the radius of all neurons for the given duration"""
         # shrink the fired neuron in one time step
-        self.neurons['radius'][fired_neuron] -= self.k / self.f_sat * self._h
+        self.neurons['radius'][fired_neuron] -= self.k / self.f_sat
         # global evolution of firing rates
         self.neurons['radius'] += self.k * duration
 
@@ -233,7 +235,8 @@ class NeuralNetwork:
         if save:
             if f_name == "":
                 f_name = f"time_{self.current_time}"
-            plt.savefig(f_name + ".jpg", bbox_inches='tight', dpi=300)
+            plt.savefig("img/" + self.prefix + f_name + ".jpg",
+                bbox_inches='tight', dpi=300)
         else:
             plt.show()
 
@@ -311,8 +314,8 @@ class NeuralNetwork:
 
         print(f"\n\nRendered the model in {end-start} seconds CPU time.")
 
-        np.save("mean_mutual_area.npy", np.array(arr))    # save the sample data
-        np.save("firing_rage.npy", np.array(fire_rate))     # save the fire_rate data
+        np.save("../data" + self.prefix + "mean_mutual_area.npy", np.array(arr))    # save the sample data
+        np.save("../data" + self.prefix +"firing_rate.npy", np.array(fire_rate))     # save the fire_rate data
         self.display('b', save=True, f_name='end')      # display the final state of the system
 
 
