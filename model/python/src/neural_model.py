@@ -61,7 +61,7 @@ class NeuralNetwork:
         # inhomogenious part
         if np.sum(self.fired) > 0:  # if at least 1 neuron fired
             self.mutual_area = self.calc_mutual_area()  # update mutual area
-            self.neurons['f_i'][self.fired] += np.sum(self.mutual_area[self.fired]) * self.g    # inhomogenious increment of f_i
+            self.neurons['f_i'] += self.mutual_area[self.fired].reshape(-1) * self.g * self._h    # inhomogenious increment of f_i
         else:
             pass
 
@@ -72,7 +72,7 @@ class NeuralNetwork:
         self.fired = np.random.random(size=self.num) < self.neurons['f_i'] * self._h
         self.update_fire_rate()     # update fire rate
         self.neurons['radius'] += self.k * self._h   # homogenious increment
-        self.neurons['radius'][self.fired] -= self.k / self.f_sat   # inhomogenious decrement
+        self.neurons['radius'][self.fired] -= self.k / self.f_sat * self._h  # inhomogenious decrement
 
     @staticmethod
     def func(d, r1, r2) -> float:
@@ -229,7 +229,7 @@ def test():
     network.animate_system('b')
 
     start = time()
-    duration = 5 * 10 ** 2
+    duration = 5.e5
     num = int(duration // network._h)
     interval = 100
     array = np.zeros((num // interval, network.num))
@@ -245,6 +245,7 @@ def test():
     network.display('r')
 
     print(array[-1])
+    np.save("linear_integration_data.npy", array)   # save the data
     plt.plot(np.linspace(1, num // interval, num // interval), array)
     plt.show()
 

@@ -11,7 +11,7 @@ from scipy.spatial.distance import squareform, pdist
 class NeuralNetwork:
     """Form the neural network model."""
     def __init__(self, size=1, neuron_population: int=100, tau: float=0.01,
-            f0: float=0.01, f_sat: float=2, g: float=500, k: float=10 ** -6,
+            f0: float=0.01, f_sat: float=2, g: float=500, k: float=1e-6,
             timestep: float=0.001, random_seed: int=20) -> None:
         self.size = size    # the size of the area of the square canvas
         self._num = neuron_population    # the population of the neuron in canvas
@@ -56,7 +56,7 @@ class NeuralNetwork:
 
         self.MAX_TIME = 500   # the latest possible spike time in seconds
         self.time_ax = np.arange(0, self.MAX_TIME ,timestep)  # initialize the time axis
-        self.f_list = np.arange(0.01, 10, .1)   # list of various initial f
+        self.f_list = np.arange(0.01, 50, .1)   # list of various initial f
         cpdf_list = []  # initialize cpdf
         for f0 in self.f_list:
             isi = NeuralNetwork.pdf(self.time_ax, tau=tau, f_0=self.f0, f0=f0)  # generate isi distribution using this f0
@@ -126,6 +126,8 @@ class NeuralNetwork:
         for i in range(self._num):   # do the following for each neuron
             f_ind = NeuralNetwork.nearest_value(self.f_list,
                 self.neurons['f_i'][i]) # find the best f0 for f_i of this neuron
+            if f_ind is None:
+                continue    # if f_ind higher than the max value, try next neuron
             rand_time_index = NeuralNetwork.nearest_value(self.cpdf[f_ind],
                 rand[i])    # find the next spike of neuron i
             if rand_time_index is None: # if rand_time greater than time axis, ignore it
@@ -140,9 +142,8 @@ class NeuralNetwork:
         """Update the firing rate of the neurons until the given duration"""
         self.mutual_area = self.calc_mutual_area()  # update mutual area
 
-        """!!!The inhomogenious update might be wrong!!!"""
         # inhomogenious update
-        self.neurons['f_i'][fired_neuron] += np.sum(self.mutual_area[fired_neuron]) * self.g
+        self.neurons['f_i'] += self.mutual_area[fired_neuron] * self.g * self._h
         # homogenious update
         self.neurons['f_i'] = self.f0 - (self.f0 - self.neurons['f_i']) \
             * np.exp(-duration / self.tau)
@@ -210,7 +211,7 @@ class NeuralNetwork:
         return _mutual_area
 
 
-    def display(self, color):
+    def display(self, color, save:bool = True, f_name:str = "") -> None:
         """Plot the neurons on the canvas as disks."""
         # preparations
         r = self.neurons['radius']
@@ -229,7 +230,12 @@ class NeuralNetwork:
         ax.set_ylabel("y")
         ax.set_xlim(-0.5, self.size + 0.5)
         ax.set_ylim(-0.5, self.size + 0.5)
-        plt.show()
+        if save:
+            if f_name == "":
+                f_name = f"time_{self.current_time}"
+            plt.savefig(f_name + ".jpg", bbox_inches='tight', dpi=300)
+        else:
+            plt.show()
 
     def animate_system(self, color):
         def animate(i):
@@ -279,43 +285,44 @@ class NeuralNetwork:
         interval
             The system time interval between data aquisition (in seconds)
         """
-        self.display('r')  # display the initial state of the system
+        self.display('r', save=True, f_name='start')  # display the initial state of the system
         from time import time
         print(f"Requested to render the model for {duration} seconds\n"
                 f"The value for model timestep: {self._h}\n"
                 f"Beginning the render process...\n")
 
         arr = []
+        fire_rate = []
         if progress:    # optional progress log
             start = time()
             while self.current_time < duration:
-                print(f"\rProgress: {self.current_time:.2f} / {duration} seconds ", end='')
                 self.evolve(interval)   # evolve for interval seconds
                 arr.append(np.sum(self.mutual_area, axis=0) * self.tau * self.g)    # record mean mutual
+                fire_rate.append(self.neurons['f_i'])   # record the firing rate of neurons
+                print(f"\rProgress: {self.current_time:.2f} / {duration} seconds ", end='')
             end = time()
         else:
             start = time()
             while self.current_time < duration:
                 self.evolve(interval)   # evolve for interval seconds
+                arr.append(np.sum(self.mutual_area, axis=0) * self.tau * self.g)    # record mean mutual
+                fire_rate.append(self.neurons['f_i'])   # record the firing rate of neurons
             end = time()
 
         print(f"\n\nRendered the model in {end-start} seconds CPU time.")
-        np.save("data.npy", np.array(arr))    # save the sample data
 
-        self.display('r')
+        np.save("mean_mutual_area.npy", np.array(arr))    # save the sample data
+        np.save("firing_rage.npy", np.array(fire_rate))     # save the fire_rate data
+        self.display('b', save=True, f_name='end')      # display the final state of the system
 
 
 
 def test():
     """Test the system."""
-    from time import time   # to calc runtime of the program
     seed = eval(input("Enter seed:\n>> "))
-    network = NeuralNetwork(neuron_population=100, k=1e-5, random_seed=seed)
-    # network.evolve(3000)
-    network.render(1e4, progress=True)
+    network = NeuralNetwork(neuron_population=100, k=1e-6, random_seed=seed)
 
-
-    # network.animate_system('b')
+    network.render(5e5, progress=True, interval=500)
 
 
 if __name__ == '__main__':
