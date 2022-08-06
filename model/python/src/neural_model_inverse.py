@@ -314,8 +314,8 @@ class NeuralNetwork:
 
         print(f"\n\nRendered the model in {end-start} seconds CPU time.")
 
-        np.save("../data" + self.prefix + "mean_mutual_area.npy", np.array(arr))    # save the sample data
-        np.save("../data" + self.prefix +"firing_rate.npy", np.array(fire_rate))     # save the fire_rate data
+        np.save("../data/" + self.prefix + "mean_mutual_area.npy", np.array(arr))    # save the sample data
+        np.save("../data/" + self.prefix +"firing_rate.npy", np.array(fire_rate))     # save the fire_rate data
         self.display('b', save=True, f_name='end')      # display the final state of the system
 
 
