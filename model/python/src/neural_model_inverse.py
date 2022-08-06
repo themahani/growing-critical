@@ -128,8 +128,8 @@ class NeuralNetwork:
         for i in range(self._num):   # do the following for each neuron
             f_ind = NeuralNetwork.nearest_value(self.f_list,
                 self.neurons['f_i'][i]) # find the best f0 for f_i of this neuron
-            if f_ind is None:
-                continue    # if f_ind higher than the max value, try next neuron
+            # if f_ind is None:
+            #     continue    # if f_ind higher than the max value, try next neuron
             rand_time_index = NeuralNetwork.nearest_value(self.cpdf[f_ind],
                 rand[i])    # find the next spike of neuron i
             if rand_time_index is None: # if rand_time greater than time axis, ignore it
