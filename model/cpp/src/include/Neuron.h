@@ -58,16 +58,8 @@ class Neuron
         }
 
         /* fire with a certain probability */
-        bool fire(double& _h, double& K, double& f_sat)
+        double nextSpikeTime()
         {
-            int prob = firing_rate * _h;    // the equation for probability of firing a neuron
-            fired =  (rand() % 1000) / 1000.0 < prob;   // fire with probability prob
-            radius += K * _h;   // homogeneous radius update
-            if (fired)
-            {
-                std::cout << "[Neuron]: fired... " << fired << std::endl;
-                radius -= K / f_sat;    // in-homogeneous radius update
-            }
-            return fired;
+            return 0;
         }
 };
