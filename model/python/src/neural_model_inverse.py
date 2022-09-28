@@ -105,7 +105,7 @@ class NeuralNetwork:
         """
         ind = np.searchsorted(arr, value, side='left')
         if ind == len(arr):
-            return
+            return -1
 
         mask = np.abs(arr[ind] - value) > np.abs(arr[ind-1] - value)
         if mask:
@@ -128,10 +128,16 @@ class NeuralNetwork:
         for i in range(self._num):   # do the following for each neuron
             f_ind = NeuralNetwork.nearest_value(self.f_list,
                 self.neurons['f_i'][i]) # find the best f0 for f_i of this neuron
-            # if f_ind is None:
-            #     continue    # if f_ind higher than the max value, try next neuron
-            rand_time_index = NeuralNetwork.nearest_value(self.cpdf[f_ind],
-                rand[i])    # find the next spike of neuron i
+            if f_ind == -1:
+                new_cpdf = np.cumsum(NeuralNetwork.pdf(self.time_ax, self.tau,
+                                                       self.f0,
+                                                       self.neurons['f_i'][i]))
+
+                rand_time_index = NeuralNetwork.nearest_value(new_cpdf, rand[i])    # find the next spike of neuron i
+            else:
+                # if f_ind higher than the max value, try next neuron
+                rand_time_index = NeuralNetwork.nearest_value(self.cpdf[f_ind],
+                    rand[i])    # find the next spike of neuron i
             if rand_time_index is None: # if rand_time greater than time axis, ignore it
                 continue
             if rand_time_index < min_time_ind:
