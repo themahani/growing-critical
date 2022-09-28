@@ -2,3 +2,8 @@
 test-run.py
 # ignore python data files
 *.npy
+
+# ignore images
+*.jpg
+*.jpeg
+*.png

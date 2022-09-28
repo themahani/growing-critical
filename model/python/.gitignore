@@ -1,1 +1,4 @@
 *.ipynb
+
+# ignore numpy data files
+*.npy
