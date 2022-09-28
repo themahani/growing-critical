@@ -144,3 +144,6 @@ misc/
 *.snm
 *.synctex.gz
 *.toc
+
+# ignore sources
+sources/
