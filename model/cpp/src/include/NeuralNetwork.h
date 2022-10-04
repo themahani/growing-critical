@@ -8,6 +8,7 @@
 
 #include "Neuron.h"
 #include <bits/stdc++.h>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -93,6 +94,31 @@ class NeuralNetwork
                 fired.push_back(0);
             }
         }
+
+        /*
+         * Calculate the probability distribution function for inter-spike intervals
+         */
+        double calc_pdf(double t, double f_rate)
+        {
+            return (f0 - (f_rate - f0) * std::exp(- t / tau)) * std::exp(- f0 * t - tau * (f_rate - f0) * (1 - std::exp(- t / tau)));
+        }
+
+        std::vector<double> calc_cpdf(std::vector<double> pdf)
+        {
+            size_t length = pdf.size();
+            std::vector<double> cpdf;
+            cpdf.reserve(length);
+            for (int i=0; i < length; ++i)
+            {
+                for (int j = 0; j < i; j++) // calculate cumulative sum
+                {
+                    cpdf[i] += pdf[j];
+                }
+            }
+
+            return cpdf;
+        }
+
 
         /*
          * print the position x,y of each neuron on a line
