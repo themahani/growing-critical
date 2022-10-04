@@ -46,9 +46,14 @@ class NeuralNetwork
             else if (d < r1 - r2 && r1 >= r2)   // if circle 2 inside circle 1
                 return M_PI * r2 * r2;
             else    // if have intersection
-                return std::pow((-d + r1 + r2) * (-d - r1 + r2) *
-                        (-d + r1 - r2) * (d + r1 + r2), 0.5) * 0.5;
+                {
+                double part1 = std::pow(r1, 2) * std::acos((d*d + r1*r1 - r2*r2) / (2*d*r1));
+                double part2 = std::pow(r2, 2) * std::acos((d*d - r1*r1 + r2*r2) / (2*d*r2));
+                double part3 = std::sqrt((-d + r1 + r2) * (d - r1 + r2) * (d + r1 - r2) * (d + r1 + r2));
+                return part1 + part2 - part3;
+                }
         }
+
     public:
         NeuralNetwork(int sys_size, int pop, double f_zero, double time_step,
                 double g, double decay_time, double f_sat, double r_dot)

@@ -20,7 +20,7 @@ class Neuron
         double x_pos;
         double y_pos;
         double f0;
-        bool fired;
+        double next_spike_time;
 
     public:
         double radius;
@@ -28,7 +28,7 @@ class Neuron
 
 
         Neuron(int system_size, double f0)
-            : firing_rate(f0), f0(f0), fired(0)      // list initializers
+            : firing_rate(f0), f0(f0), next_spike_time(0)    // list initializers
         {
             // initialize random seed
             // define maximum of rand to specify the accuracy of the double number
