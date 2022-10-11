@@ -32,7 +32,12 @@ class NeuralNetwork
         double tau;     // spike decay characteristic time
         double K;       // equation for R dot
         double f_sat;   // how much the f_i goes down
-        std::vector< bool > fired;  // which neurons have fired
+
+        int MAX_TIME;   // maximum time for isi
+        std::vector<double> time_ax;    // time axis for calculating cumulative pdf
+        std::vector<double> f_ax;       // list of firing rates to calculate cpdf
+        std::vector< std::vector<double> > cpdf_matrix;     // initialized cpdf s.
+
 
         /*
          * function to calculate the intersection area of
@@ -84,18 +89,36 @@ class NeuralNetwork
                 mutual_area.push_back(row);
             }
 
-            // initilize fired
-            for (int i = 0; i < population; ++i) {
-                fired.push_back(0);
+            /* Initialize time_ax from 0 to MAX_TIME with time step _h */
+            for (int i = 0; i <= MAX_TIME; i += _h) {
+                time_ax.push_back(i);
             }
+
+            /* Initialize f_ax with 0 to 50 with steps 0.1 */
+            for (int f = 0; f <= 50; f += 0.1) {
+                f_ax.push_back(f);
+            }
+
+            /* Initialize cpdf_matrix */
+            size_t length = f_ax.size();
+            for (int i = 0; i < length; i++) {
+                cpdf_matrix.push_back(calc_cpdf(calc_pdf(time_ax, f_ax[i])));
+            }
+
         }
 
         /*
          * Calculate the probability distribution function for inter-spike intervals
          */
-        double calc_pdf(double t, double f_rate)
+        std::vector<double> calc_pdf(std::vector<double> t, double f_rate)
         {
-            return (f0 - (f_rate - f0) * std::exp(- t / tau)) * std::exp(- f0 * t - tau * (f_rate - f0) * (1 - std::exp(- t / tau)));
+            std::vector<double> pdf;
+            size_t size = t.size();
+            pdf.reserve(size);
+            for (int i = 0; i < size; i++) {
+                pdf.push_back((f0 - (f_rate - f0) * std::exp(- t[i] / tau)) * std::exp(- f0 * t[i] - tau * (f_rate - f0) * (1 - std::exp(- t[i] / tau))));
+            }
+            return pdf;
         }
 
         std::vector<double> calc_cpdf(std::vector<double> pdf)
