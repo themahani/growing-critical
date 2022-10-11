@@ -137,6 +137,23 @@ class NeuralNetwork
             return cpdf;
         }
 
+        /*
+         * Find index of nearest value in array
+         */
+        int nearest_value(std::vector<double> arr, double value)
+        {
+            int index = 0;
+            while(value < arr[index])
+                ++index;
+
+            if (index == arr.size())
+                return -1;
+            else if (arr[index] - value > value - arr[index-1])
+                return index - 1;
+            else
+                return index;
+        }
+
 
         /*
          * print the position x,y of each neuron on a line
