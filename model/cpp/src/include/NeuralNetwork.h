@@ -37,6 +37,9 @@ class NeuralNetwork
         std::vector<double> time_ax;    // time axis for calculating cumulative pdf
         std::vector<double> f_ax;       // list of firing rates to calculate cpdf
         std::vector< std::vector<double> > cpdf_matrix;     // initialized cpdf s.
+        int next_neuron_spike;
+
+        std::vector<int> spike_history;
 
 
         /*
@@ -59,7 +62,7 @@ class NeuralNetwork
         NeuralNetwork(int sys_size, int pop, double f_zero, double time_step,
                 double g, double decay_time, double f_sat, double r_dot)
             : population(pop), size(sys_size), f0(f_zero), _h(time_step),
-            g(g), tau(decay_time), f_sat(f_sat), K(r_dot)
+            g(g), tau(decay_time), f_sat(f_sat), K(r_dot), MAX_TIME(500), next_neuron_spike(0)
         {
             /* initialize random seed */
             std::srand(time(NULL));
@@ -154,6 +157,28 @@ class NeuralNetwork
                 return index;
         }
 
+        /*
+         * Find next spike time and the neuron that spikes
+         */
+        double next_spike_time()
+        {
+            double earliest_spike = MAX_TIME;
+            for (int i = 0; i < population; i++) {
+                int f_index = nearest_value(f_ax, neuron_arr[i].firing_rate);
+
+                double random = std::rand();    // generate random between 0 and 1
+                LOG("random number between 0 and 1: " << random);
+                double next_spike_index = nearest_value(cpdf_matrix[i], f_ax[f_index]);
+
+                if (time_ax[next_spike_index] < earliest_spike)
+                {
+                    next_neuron_spike = i;
+                    earliest_spike = time_ax[next_spike_index];
+                }
+            }
+            spike_history.push_back(next_neuron_spike);
+            return earliest_spike;
+        }
 
         /*
          * print the position x,y of each neuron on a line
