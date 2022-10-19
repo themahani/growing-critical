@@ -57,9 +57,4 @@ class Neuron
             return radius;
         }
 
-        /* fire with a certain probability */
-        double nextSpikeTime()
-        {
-            return 0;
-        }
 };

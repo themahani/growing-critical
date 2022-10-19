@@ -32,6 +32,7 @@ class NeuralNetwork
         double tau;     // spike decay characteristic time
         double K;       // equation for R dot
         double f_sat;   // how much the f_i goes down
+        double system_time;    // system time
 
         int MAX_TIME;   // maximum time for isi
         std::vector<double> time_ax;    // time axis for calculating cumulative pdf
@@ -58,6 +59,49 @@ class NeuralNetwork
                 return std::pow((-d + r1 + r2) * (-d - r1 + r2) *
                         (-d + r1 - r2) * (d + r1 + r2), 0.5) * 0.5;
         }
+
+        void update_fire_rate(double duration)
+        {
+            calc_mutual_area();
+            // homogeneous update
+            for (auto neuron : neuron_arr)
+            {
+                neuron.firing_rate = f0 - (f0 - neuron.firing_rate) * std::exp(-duration / tau);
+            }
+
+            // inhomogeneous update
+            for (int i=0; i < population; ++i)
+            {
+                neuron_arr[i].firing_rate += mutual_area[spike_history[-1]][i] * g;
+            }
+        }
+
+        void update_radius(double duration)
+        {
+            // shrink the fired neuron in one time step
+            neuron_arr[spike_history[-1]].radius -= K / f_sat;
+
+            // global growth of neurons
+            for (auto neuron : neuron_arr)
+            {
+                neuron.radius += K * duration;
+            }
+        }
+
+        /*
+         * Evolve the system for a
+         * specified duration
+         */
+        void evolve(double until)
+        {
+            double time_limit = system_time + until;
+            while (system_time < time_limit){
+                double next_spike_time = find_next_spike();
+                update_fire_rate(next_spike_time);
+                update_radius(next_spike_time);
+            }
+        }
+
     public:
         NeuralNetwork(int sys_size, int pop, double f_zero, double time_step,
                 double g, double decay_time, double f_sat, double r_dot)
@@ -160,7 +204,7 @@ class NeuralNetwork
         /*
          * Find next spike time and the neuron that spikes
          */
-        double next_spike_time()
+        double find_next_spike()
         {
             double earliest_spike = MAX_TIME;
             for (int i = 0; i < population; i++) {
@@ -250,39 +294,7 @@ class NeuralNetwork
          * and update the radius and firing rate
          * of each neuron in the network
          */
-        void timestep()
-        {
-            // fire neurons
-            for (int i = 0; i < population; ++i)
-            {
-                fired[i] = neuron_arr[i].fire(_h, K, f_sat);
-                neuron_arr[i].firing_rate += (f0 - neuron_arr[i].firing_rate) / tau * _h;   // homogeneous f_i update
-                // in-homogeneous f_i update
-                for (int j = 0; j < population && j != i; ++j)
-                {
-                    if (fired[j] == 1 && mutual_area[i][j] != 0)
-                        neuron_arr[i].firing_rate += tau * g * mutual_area[i][j];
-                }
-            }
 
-            calc_mutual_area();      // update mutual area
-
-        }
-
-        /*
-         * Function that evolves the system for a
-         * specified duration
-         */
-        void evolve(double duration)
-        {
-            int rep = int(duration / _h);   // find the number of time steps needed
-
-            print_matrix(mutual_area);
-            for (int i = 0; i < rep; ++i) {
-                timestep();
-            }
-            print_matrix(mutual_area);
-        }
 
         /*
          * output the position and radius to a file
@@ -363,42 +375,21 @@ class NeuralNetwork
             }
             else
             {
-                int rep = int(duration / _h);   // find the number of time steps needed
-                int interval = int(rep / 1000); // find interval for between each sampling
-                if (interval == 0)        // if interval == 0
-                {
-                    for (int j = 0; j < rep; ++j) {    // run interval times
-                        std::cout << "\r Progress: " << j / rep * 100 << "%" << std::flush;   // report progress
+                double interval = duration / 500;   // intervals to record data
 
-                        timestep(); // evolve for 1 time step
-                        std::vector<double> means = calc_mean_area();   // sample mean_area_intersection
+                while (system_time < duration) {
+                    std::cout << "\r System Time: " << time << " / " << duration << "\t" << std::flush;    // report progress
 
-                        for (double mean : means)
-                            output << mean << ", "; // write means to ouput file
-                        output << std::endl;    // new line for new sampling
+                    evolve(interval);
 
-                        log_radius(radius_out);
-                    }
-                    std::cout << std::endl;     // new line after end of progress report
+                    std::vector<double> means = calc_mean_area();   // sample mean_area_intersection
+                    for (double mean : means)
+                        output << mean << ", "; // write means to ouput file
+                    output << std::endl;    // new line for new sampling
+
+                    log_radius(radius_out);
                 }
-                else
-                {
-                    for (int i = 0; i < 1000; ++i) {
-                        std::cout << "\r Progress: " << i / 10.0 << "%" << std::flush;    // report probress
-
-                        for (int j = 0; j < interval; ++j) {    // run interval times
-                            timestep();
-                        }
-
-                        std::vector<double> means = calc_mean_area();   // sample mean_area_intersection
-                        for (double mean : means)
-                            output << mean << ", "; // write means to ouput file
-                        output << std::endl;    // new line for new sampling
-
-                        log_radius(radius_out);
-                    }
-                    std::cout << std::endl;     // new line after end of progress report
-                }
+                std::cout << std::endl;     // new line after end of progress report
             }
             output.close(); // close file and flush fstream
             radius_out.close(); // close file and flush fstream

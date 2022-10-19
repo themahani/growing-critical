@@ -24,9 +24,9 @@ int main(void)
      * f_sat: 2.0
      * K = r_dot: 0.01
      */
-    NeuralNetwork mySystem = NeuralNetwork(1, 100, 0.01, 0.01, 500, 0.1, 2.0, 0.01);
+    NeuralNetwork mySystem = NeuralNetwork(1, 100, 0.01, 0.01, 500, 0.1, 2.0, 1e-6);
     mySystem.output_neuron_data(run_name);
-    mySystem.simulate_system(50000.0, run_name);
+    mySystem.simulate_system(300000.0, run_name);
 
     auto stop = std::chrono::high_resolution_clock::now();
 
