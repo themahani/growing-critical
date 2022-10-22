@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/phoenix/Code/growing-critical/model/cpp",
+            "binaryPath": "/home/phoenix/Code/growing-critical/model/cpp/GrowingCritical",
+            "binaryArgs": []
+        }
+    ]
+}
