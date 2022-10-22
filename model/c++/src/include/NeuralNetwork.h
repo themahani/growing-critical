@@ -378,7 +378,7 @@ class NeuralNetwork
                 double interval = duration / 500;   // intervals to record data
 
                 while (system_time < duration) {
-                    std::cout << "\r System Time: " << time << " / " << duration << "\t" << std::flush;    // report progress
+                    std::cout << "\r System Time: " << system_time << " / " << duration << "\t" << std::flush;    // report progress
 
                     evolve(interval);
 
